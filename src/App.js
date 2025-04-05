@@ -2,7 +2,7 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ChatPage from './pages/ChatPage';
 import Home from "./pages/Home/Home";
-
+import BaseForm from "./components/Forms/BaseForm/BaseForm";
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/dummy" element={<Home />} />
+        <Route path="/dummy" element={<BaseForm />} />
         <Route path="/chat" element={<ChatPage/>} />
       </Routes>
     </Router>

@@ -1,0 +1,140 @@
+/* PrepForm.css */
+.base-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .tab-container {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .tab-button {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px 4px 0 0;
+    flex: 1;
+    text-align: center;
+  }
+  
+  .tab-button.active {
+    background-color: #f0f0f0;
+    font-weight: bold;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: vertical;
+  }
+  
+  .preview-section {
+    margin-top: 30px;
+    margin-bottom: 20px;
+  }
+  
+  .preview-section h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .preview-content {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 4px;
+  }
+  
+  .preview-item {
+    margin-bottom: 15px;
+  }
+  
+  .preview-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .preview-text {
+    white-space: pre-wrap;
+  }
+  
+  .empty-preview {
+    background-color: #f9f9f9;
+    padding: 20px;
+    text-align: center;
+    color: #999;
+    border-radius: 4px;
+  }
+  
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .cancel-button {
+    padding: 10px 20px;
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .save-button {
+    padding: 10px 20px;
+    background-color: #222;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  .save-button:hover {
+    background-color: #444;
+  }
+  
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    .prep-form-container {
+      padding: 15px;
+    }
+    
+    .button-group {
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .cancel-button, .save-button {
+      width: 100%;
+    }
+  }
