@@ -1,24 +1,21 @@
-import React from 'react'
+import React from 'react';
+import './Tabs.css';
 
-function Tabs({activeTab,handleTabChange}) {
+const Tabs = ({ tabs, activeTab, handleTabChange }) => {
   return (
-    <div>
-      <div className="tab-container">
-        <button 
-          className={`tab-button ${activeTab === 'prep' ? 'active' : ''}`}
-          onClick={() => handleTabChange('prep')}
+    <div className="tabs-container">
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
+          className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+          onClick={() => handleTabChange(tab.id)}
+          type="button"
         >
-          PREPで作成
+          {tab.label}
         </button>
-        <button 
-          className={`tab-button ${activeTab === 'free' ? 'active' : ''}`}
-          onClick={() => handleTabChange('free')}
-        >
-          自由に作成
-        </button>
-      </div>
+      ))}
     </div>
-  )
-}
+  );
+};
 
-export default Tabs
+export default Tabs;

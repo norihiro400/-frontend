@@ -1,4 +1,4 @@
-/* PrepForm.css */
+  /* フォーム全体のレイアウトスタイル*/
 .base-form-container {
     max-width: 800px;
     margin: 0 auto;
@@ -14,48 +14,9 @@
     margin-bottom: 20px;
   }
   
-  .tab-container {
-    display: flex;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #e0e0e0;
-  }
+
   
-  .tab-button {
-    padding: 10px 20px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    border-radius: 4px 4px 0 0;
-    flex: 1;
-    text-align: center;
-  }
-  
-  .tab-button.active {
-    background-color: #f0f0f0;
-    font-weight: bold;
-  }
-  
-  .form-group {
-    margin-bottom: 20px;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    font-size: 14px;
-  }
-  
-  textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    resize: vertical;
-  }
-  
+/* 入力内容のプレビューセクション */
   .preview-section {
     margin-top: 30px;
     margin-bottom: 20px;
@@ -93,6 +54,9 @@
     border-radius: 4px;
   }
   
+
+
+  /* フォームのキャンセルボタンと送信ボタン*/
   .button-group {
     display: flex;
     justify-content: space-between;

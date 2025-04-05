@@ -1,122 +1,267 @@
 import React, { useState } from 'react';
-import "./BaseForm.css"
+import "./BaseForm.css";
 import Tabs from '../../Tabs/Tabs';
 import PrepForm from '../PrepForm/PrepForm';
 import FreeForm from '../FreeForm/FreeForm';
+import FiveWOneHForm from '../FiveWOneHForm/FiveWOneHForm'; 
+import ErrorSolvingForm from '../ErrorSolvingForm/ErrorResolvingForm';
 
+// タブの設定を一元管理 - 拡張しやすいオブジェクト構造に
+const FORM_TYPES = {
+  PREP: 'prep',
+  FIVE_W_ONE_H: '5W1H',
+  FREE: 'free',
+  ERROR_SOLVING: 'errorSolving',
+};
 
+// タブ設定（UI表示用）
+const tabConfig = [
+  { id: FORM_TYPES.PREP, label: 'PREPで作成' },
+  { id: FORM_TYPES.FIVE_W_ONE_H, label: '5W1Hで作成' },
+  { id: FORM_TYPES.FREE, label: '自由に作成' },
+  { id: FORM_TYPES.ERROR_SOLVING, label: 'エラー解決プロセス' },
+];
 
-//自身の回答をpropsとして受け取って利用する
-const BaseForm= ({goal = "useEffectの挙動を理解して他人に説明できるようになること", target = "プログラミング"}) => {  
-  
-  // フォームの状態を管理
-  const [formData, setFormData] = useState({
-    point: '',
-    reason: '',
-    example: '',
-    pointSummary: ''
-  });
-  
-    // 入力変更のハンドラ
-    const handleInputChange = (e) => {
-      const { name, value } = e.target;
-      setFormData({
-        ...formData,
-        [name]: value
-      });
-    };
-
-
-
+const BaseForm = ({onSubmitContent }) => {
   // タブの状態管理
-  const [activeTab, setActiveTab] = useState('prep');
+  const [activeTab, setActiveTab] = useState(tabConfig[0].id);
   
-    // タブ切り替えのハンドラ
-    const handleTabChange = (tab) => {
-      setActiveTab(tab);
-    };
-
-
-
-
-  // プレビュー表示の状態
-  const [showPreview, setShowPreview] = useState(false);
-  
-
-  // フォーム送信のハンドラ
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('フォームデータを送信:', formData);
-    // ここでAPIへの送信などの処理を行う
+  // タブ切り替えのハンドラ
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
   };
-  
-  // プレビューの表示/非表示を切り替え
-  const togglePreview = () => {
-    setShowPreview(!showPreview);
-  };
-  
-  // キャンセルボタンのハンドラ
-  const handleCancel = () => {
-    // フォームをリセットするなどの処理
-    setFormData({
+    
+  // 各フォームタイプの初期状態を一元管理
+  const initialFormStates = {
+    // PREP用初期状態
+    [FORM_TYPES.PREP]: {
       point: '',
       reason: '',
       example: '',
       pointSummary: ''
+    },
+    // 自由記述用初期状態
+    [FORM_TYPES.FREE]: {
+      content: ''
+    },
+    // 5W1H用初期状態
+    [FORM_TYPES.FIVE_W_ONE_H]: {
+      who: '',
+      when: '',
+      why: '',
+      what: '',
+      where: '',
+      how: ''
+    },
+    // エラー解決テンプレート用初期状態
+    [FORM_TYPES.ERROR_SOLVING]: {
+      problem: '',
+      errorMessage: '',
+      possibleCauses: '',
+      attemptedSolutions: '',
+      finalSolution: '',
+      learnings: ''
+    },
+  };
+
+  // 一つの状態に全フォームタイプの状態が格納されている
+  const [formState, setFormState] = useState(initialFormStates);
+  
+  // 入力変更の汎用ハンドラ
+  const handleInputChange = (formType) => (e) => {
+    const { name, value } = e.target;
+    setFormState({
+      ...formState,
+      [formType]: {
+        ...formState[formType],
+        [name]: value
+      }
     });
-    setShowPreview(false);
+  };
+  
+  // キャンセルボタンのハンドラ
+  const handleCancel = () => {
+    setFormState({
+      ...formState,
+      [activeTab]: initialFormStates[activeTab]
+    });
+  };
+
+  // フォームが入力されているかチェックする関数
+  const hasFormInput = (formType, formData) => {
+    switch(formType) {
+      case FORM_TYPES.PREP:
+        return formData.point.trim() !== '' && 
+               formData.reason.trim() !== '' &&
+               formData.example.trim() !== '' &&
+               formData.pointSummary.trim() !== '';
+      
+      case FORM_TYPES.FIVE_W_ONE_H:
+        return formData.who.trim() !== '' || 
+               formData.when.trim() !== '' ||
+               formData.where.trim() !== '' ||
+               formData.what.trim() !== '' ||
+               formData.why.trim() !== '' ||
+               formData.how.trim() !== '';
+      
+      case FORM_TYPES.FREE:
+        return formData.content.trim() !== '';
+      
+      case FORM_TYPES.ERROR_SOLVING:
+        return formData.problem.trim() !== '' &&
+               formData.errorMessage.trim() !== '' &&
+               formData.possibleCauses.trim() !== '' &&
+               formData.attemptedSolutions.trim() !== '' &&
+               formData.finalSolution.trim() !== '' &&
+               formData.learnings.trim() !== '';
+      
+      default:
+        return false;
+    }
+  };
+
+  // 各フォーム形式から文章を生成する関数。
+  const generateUnifiedText = (formType, formData) => {
+    // 入力がない場合は空文字を返す
+    if (!hasFormInput(formType, formData)) {
+      return '';
+    }
+
+    switch(formType) {
+      // 最終的にバックエンドに送信する文章(PREP)
+      case FORM_TYPES.PREP:
+        return `${formData.point}が重要なポイントです。なぜなら、${formData.reason}だからです。具体的な例を挙げると、${formData.example}といったことが挙げられます。このことから、${formData.pointSummary}というのが私の考えです。`;
+      
+      // 最終的にバックエンドに送信する文章(5W1H)
+      case FORM_TYPES.FIVE_W_ONE_H:
+        let text = '';
+        
+        if (formData.who) text += `${formData.who}が`;
+        if (formData.when) text += `${formData.when}に`;
+        if (formData.where) text += `${formData.where}で`;
+        if (formData.what) text += `${formData.what}を`;
+        if (formData.why) text += `${formData.why}という理由から`;
+        if (formData.how) text += `${formData.how}という方法で`;
+        // 末尾の処理
+        if (text.length > 0) {
+          text += '行いました。';
+        }
+        return text;
+      
+      // 最終的にバックエンドに送信する文章(自由記入)
+      case FORM_TYPES.FREE:
+        return formData.content;
+        
+      // 最終的にバックエンドに送信する文章(エラー解決)
+      case FORM_TYPES.ERROR_SOLVING:
+        return `今回${formData.problem}という問題に遭遇しました。エラーメッセージは次のようになっていました。${formData.errorMessage}。
+        私はこのエラーの原因は${formData.possibleCauses}ではないかという仮説を立て、${formData.attemptedSolutions}という解決策を試しました。
+        最終的な解決策としては${formData.finalSolution}のようなことを行いました。学びと今後の対策としては${formData.learnings}という教訓を得ました。`;
+
+      default:
+        return '';
+    }
+  };
+
+  // 選択中のタブに合わせたタブをコンポーネントを返す関数
+  const renderActiveForm = () => {
+    const currentFormData = formState[activeTab];
+    
+    switch(activeTab) {
+      case FORM_TYPES.PREP:
+        return (
+          <PrepForm 
+            handleInputChange={handleInputChange(FORM_TYPES.PREP)} 
+            formData={currentFormData} 
+          />
+        );
+      case FORM_TYPES.FIVE_W_ONE_H:
+        return (
+          <FiveWOneHForm 
+            handleInputChange={handleInputChange(FORM_TYPES.FIVE_W_ONE_H)} 
+            formData={currentFormData} 
+          />
+        );
+      case FORM_TYPES.FREE:
+        return (
+          <FreeForm 
+            handleInputChange={handleInputChange(FORM_TYPES.FREE)} 
+            formData={currentFormData} 
+          />
+        );
+
+      case FORM_TYPES.ERROR_SOLVING:
+        return (
+          <ErrorSolvingForm
+            handleInputChange={handleInputChange(FORM_TYPES.ERROR_SOLVING)} 
+            formData={currentFormData} 
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  // **************重要！！！！**************************:
+  // フォーム送信のハンドラ
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    // 入力が不十分な場合、エラーアラートを表示して送信を中止
+    if (!hasFormInput(activeTab, formState[activeTab])) {
+      window.alert('必要な項目が入力されていません。すべての項目を入力してください。');
+      return;
+    }
+    
+
+    // フォームデータを文章化
+    const generatedText = generateUnifiedText(activeTab, formState[activeTab]);
+
+    // チャットコンポーネントに伝える
+    onSubmitContent(generatedText);
+
+    // ******API送信用のデータのフォーマットを content: generatedTextに統一する＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+    const unifiedData = {
+      content: generatedText,
+    };
+
+    
+    
+    console.log('送信データ:', unifiedData);
+    // ここでAPIへの送信処理
   };
   
   return (
     <div className="base-form-container">
-      <h2 className="form-title">文章の作成</h2>
+      <h2 className="form-title">文章を作成する</h2>
       
-      {/* タブ切り替え */}
-      <Tabs activeTab={activeTab} handleTabChange={handleTabChange}/>
+      {/* タブ切り替え - タブ設定を渡す */}
+      <Tabs 
+        tabs={tabConfig}
+        activeTab={activeTab} 
+        handleTabChange={handleTabChange}
+      />
       
       <form onSubmit={handleSubmit}>
-        {activeTab === "prep" && <PrepForm/>}
-        {activeTab === "free" && <FreeForm/>}
+        {/* 現在アクティブなタブに対応するフォームを表示 */}
+        {renderActiveForm()}
         
-        {/* プレビュー */}
+        {/* プレビュー表示 */}
         <div className="preview-section">
-          <h3>プレビュー</h3>
-          {formData.point || formData.reason || formData.example || formData.pointSummary ? (
-            <div className="preview-content">
-              {formData.point && (
-                <div className="preview-item">
-                  <div className="preview-label">[主張]</div>
-                  <div className="preview-text">{formData.point}</div>
-                </div>
-              )}
-              
-              {formData.reason && (
-                <div className="preview-item">
-                  <div className="preview-label">[理由]</div>
-                  <div className="preview-text">{formData.reason}</div>
-                </div>
-              )}
-              
-              {formData.example && (
-                <div className="preview-item">
-                  <div className="preview-label">[具体例]</div>
-                  <div className="preview-text">{formData.example}</div>
-                </div>
-              )}
-              
-              {formData.pointSummary && (
-                <div className="preview-item">
-                  <div className="preview-label">[まとめ]</div>
-                  <div className="preview-text">{formData.pointSummary}</div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="empty-preview">プレビューするにはフォームに入力してください</div>
-          )}
+          <h3>文章プレビュー</h3>
+          <div className="preview-content">
+            {generateUnifiedText(activeTab, formState[activeTab]) ? (
+              <div className="preview-text">
+                {generateUnifiedText(activeTab, formState[activeTab])}
+              </div>
+            ) : (
+              <div className="empty-preview">文章プレビューを表示するにはフォームに入力してください</div>
+            )}
+          </div>
         </div>
         
-        {/* ボタン */}
+        {/* フォーム送信またはキャンセル用ボタン */}
         <div className="button-group">
           <button 
             type="button" 

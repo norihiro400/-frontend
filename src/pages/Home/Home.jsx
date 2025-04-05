@@ -58,7 +58,7 @@ function Home() {
           </div>
         </div>
         
-        <button className="start-button" onClick={()=>{navigate('/dummy')}}>チャットを始める</button>
+        <button className="start-button" onClick={()=>{navigate('/chat')}}>チャットを始める</button>
       </div>
     </div>
   );
