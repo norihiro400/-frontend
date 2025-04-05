@@ -1,16 +1,19 @@
-import {BrowserRouter, Route, Routes} from "react-router-dom"
+import './App.css';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ChatPage from './pages/ChatPage';
 import Home from "./pages/Home/Home";
 
 
 function App() {
   return (
     <div className="App">
-    <BrowserRouter>
+    <Router>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/dummy" element={<Home />} />
+        <Route path="/chat" element={<ChatPage/>} />
       </Routes>
-    </BrowserRouter>
+    </Router>
     </div>
   );
 }
