@@ -32,11 +32,11 @@ const ContentEvaluation = ({ content, onEvaluate }) => {
     }
     
     // 続けるかどうかを決定
-    // 「目的に沿っている」かつ「表現が適切」な場合のみ続行
-    const shouldContinue = evaluation.isRelevant && evaluation.isAppropriate;
+    // 「目的に沿っていない」または「表現が適切ではない」場合続行
+    const shouldContinue = evaluation.isRelevant === false ||  evaluation.isAppropriate === false ;
     
     // 評価結果を親コンポーネントに渡す
-    onEvaluate(shouldContinue, evaluation);
+    onEvaluate(shouldContinue);
   };
 
   return (

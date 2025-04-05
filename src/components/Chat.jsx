@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import BaseForm from "./Forms/BaseForm/BaseForm";
 import ContentEvaluation from "./ContentEvaluation/ContentEvaluation";
 
-const questions = [
+const initialQuestions = [
   "整理したい思考のジャンルを教えてください(悩み、気づき)",
   "具体的な対象を教えてください。例えば、「プログラミング学習」,「部活動」,「バイト」など",
   "最終的な目標を教えてください(どういう言語化をしたいですか?)",
@@ -16,33 +16,32 @@ export default function Chat() {
   const [currentScreen, setCurrentScreen] = useState('questions');
 
   // 質問フェーズの状態群
+  const [questions, setQuestions] = useState(initialQuestions);
   const [step, setStep] = useState(0);
   const [input, setInput] = useState("");
-  const [chatLog, setChatLog] = useState([
-    { role: "bot", text: questions[0] }
-  ]);
-  const bottomRef = useRef(null);
-
-  //フォーム入力によって生成された文章を格納する状態
-  const [generatedContent, setGeneratedContent] = useState("");
-
 
   // 初期ロード時にAPIから質問を取得
   useEffect(() => {
-    // APIから質問を取得する処理
-    // 実装されたらここにコードを追加
+      // APIから質問を取得する処理
+      // 実装されたらここにコードを追加
   }, []);
 
+  // チャットUI用
+  const [chatLog, setChatLog] = useState([
+    { role: "bot", text: questions[0] }
+  ]); 
 
+  // チャット送信時の自動スクロール用
+  const bottomRef = useRef(null);
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatLog]);
 
+  // チャット送信時のロジック
   const handleSend = () => {
     if (!input.trim()) return;
 
     const newLog = [...chatLog, { role: "user", text: input }];
-
 
     if (step + 1 < questions.length) {
       // まだ質問が残っている場合
@@ -59,8 +58,14 @@ export default function Chat() {
     }
   };
 
-    // 生成された文章を受け取るコールバック
-    const handleContentSubmit = (content, type) => {
+
+
+
+  //フォーム入力によって生成された文章を格納する状態
+  const [generatedContent, setGeneratedContent] = useState("");
+
+  // 生成された文章を受け取るコールバック
+  const handleContentSubmit = (content) => {
       // フォームで生成した言語化文章をチャットで表示するために受け取る
       setGeneratedContent(content);
       // アプリのステップを言語化⇒言語化の自己評価に進める
@@ -69,41 +74,43 @@ export default function Chat() {
       // 生成された文章をチャットログに追加
       setChatLog([
         ...chatLog,
-        { role: "bot", text: "以下の文章を作成しました："},
-        { role: "bot", text: content }
+        { role: "you", text: "以下の文章を作成しました："},
+        { role: "you", text: content }
       ]);
-    };
+  };
 
 
 
     // 言語化の自己評価
-    const handleEvaluation = (continueProcess, evaluationData) => {
-      if (continueProcess) {
+    const handleEvaluation = (souldContinue) => {
+      if (souldContinue = true) {
         // 続ける場合、新しい質問を取得または設定
-        fetchNextQuestions(evaluationData);
+        fetchNextQuestions();
       } else {
         // 終了する場合、すべてをリセット
         resetChat();
       }
     };
   
-    // 次の質問を取得
-    const fetchNextQuestions = (evaluationData) => {
+    // 自身の言語化に納得いかなかった場合、次の質問を取得
+    const fetchNextQuestions = () => {
       // APIから次の質問を取得する処理（実際の実装時にここを置き換え）
       const newQuestions = [
         "作成した文章について、もう少し具体的に説明できる部分はありますか？",
         "別の視点から考えると、どのような側面が見えてきますか？",
         "この文章をさらに発展させるとしたら、どのような内容を追加したいですか？"
       ];
-      
+
+
+      setQuestions(newQuestions);
       setStep(0);
       setCurrentScreen('questions');
       
       // 新しい質問をチャットログに追加
       setChatLog([
         ...chatLog,
-        { role: "you", text: "文章の作成お疲れ様でした。さらに深めていくため続けて質問を行います。" },
-        { role: "you", text: newQuestions[0] }
+        { role: "bot", text: "文章の作成お疲れ様でした。さらに深めていくため続けて質問を行います。" },
+        { role: "bot", text: newQuestions[0] }
       ]);
     };
   
