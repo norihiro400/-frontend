@@ -15,7 +15,7 @@ export default function Chat() {
   const [questions, setQuestions] = useState(initialQuestions);
   const [step, setStep] = useState(0);
   const [input, setInput] = useState("");
-  const [conti,setConti] = useState(true);
+  const [limit,setLimit] = useState(8);
   const [chatLog, setChatLog] = useState([
     { role: "model", parts: [questions[0]] }
   ]);
@@ -80,7 +80,7 @@ export default function Chat() {
       }
     }
     
-    if (step > 2 && step < 8) {
+    if (step > 2 && step <= limit) {
       const item = {
         history: newLog,
         question: newLog[newLog.length - 2].parts[0],
@@ -97,17 +97,50 @@ export default function Chat() {
     }
 
         // 「はい/いいえ」の応答処理
-    if (step === 8) {
-      setCurrentScreen("form");
+    if (step === limit) {
+      updatedLog.push({role:"model",parts:["質問を続けますか?それとも思考の文章化に移りますか?"]});
     }
 
+    if(step >= limit+1){
+      
+      const lowerInput = input.trim().toLowerCase();
+
+      // 「はい」と答えたら質問継続 → limit+5
+      if (lowerInput === "はい") {
+        const question = await getquestion(updatedLog);
+        if (question?.response) {
+          updatedLog.push({ role: "model", parts: [question.response] });
+        }
+        setLimit((prev) => prev + 5); // limit + 5
+        setStep(nextStep);
+        setChatLog(updatedLog);
+        return;
+      }
+    
+      // 「いいえ」と答えたらフォームに移行
+      if (lowerInput === "いいえ") {
+        updatedLog.push({
+          role: "model",
+          parts: ["では、ここで一度思考を文章にまとめてみましょう。"],
+        });
+        setChatLog(updatedLog);
+        setCurrentScreen("form");
+        return;
+      }
+
+        // 「はい or いいえ」以外の入力だった場合
+      updatedLog.push({
+        role: "model",
+        parts: ["「はい」または「いいえ」で答えてください。"],
+      });
+      setChatLog(updatedLog);
+      return;
+
+
+    }
 
     setChatLog(updatedLog);
     setStep(nextStep);
-
-    if (conti === false) {
-      setCurrentScreen("form");
-    }
   };
 
   const [generatedContent, setGeneratedContent] = useState("");
