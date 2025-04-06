@@ -3,6 +3,7 @@ import BaseForm from "./Forms/BaseForm/BaseForm";
 import ContentEvaluation from "./ContentEvaluation/ContentEvaluation";
 import { getQuestionByGemini, postAnswerToGemini } from "../api";
 import { getEvaluate } from "../api/geminiFetcher";
+import ReactMarkdown from "react-markdown";
 import "./Chat.css";
 const initialQuestions = [
   "整理したい思考のジャンルを教えてください(悩み、気づき)",
@@ -15,9 +16,9 @@ export default function Chat() {
   const [questions, setQuestions] = useState(initialQuestions);
   const [step, setStep] = useState(0);
   const [input, setInput] = useState("");
-  const [limit,setLimit] = useState(8);
+  const [limit,setLimit] = useState(5);
   const [chatLog, setChatLog] = useState([
-    { role: "model", parts: [questions[0]] }
+    { role: "model", parts: [questions[0]] },
   ]);
   const bottomRef = useRef(null);
 
@@ -55,31 +56,30 @@ export default function Chat() {
     }
   };
 
-
-
   const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage = { role: "user", parts: [input] };
-    setChatLog([...chatLog,userMessage]);
+    setChatLog([...chatLog, userMessage]);
     const newLog = [...chatLog, userMessage];
     setInput("");
     let updatedLog = [...newLog];
     const nextStep = step + 1;
 
     if (step === 2) {
-      newLog.push({        
-        "role": "user",
-        "parts": [
-            "あなた は、ユーザーの思考の整理・言語化・ブラッシュアップのサポートをするAIです。\nユーザーがより良い体験ができることを最優先に考えて生成してください。\n注意事項は下記のとおりです。\n- 対話はすべて日本語で行ってください。\n- 質問は1度にたくさんせず、1回に1つとしてください。\n- 返答は簡潔にしてください。"
+      newLog.push({
+        role: "user",
+        parts: [
+          "あなた は、ユーザーの思考の整理・言語化・ブラッシュアップのサポートをするAIです。\nユーザーがより良い体験ができることを最優先に考えて生成してください。\n注意事項は下記のとおりです。\n- 対話はすべて日本語で行ってください。\n- 質問は1度にたくさんせず、1回に1つとしてください。\n- 返答は簡潔にしてください。",
         ],
-    })
+      });
       const question = await getquestion(newLog);
       if (question?.response) {
         updatedLog.push({ role: "model", parts: [question.response] });
       }
     }
     
+
     if (step > 2 && step <= limit) {
       const item = {
         history: newLog,
@@ -101,6 +101,7 @@ export default function Chat() {
       updatedLog.push({role:"model",parts:["質問を続けますか?それとも思考の文章化に移りますか?"]});
     }
 
+    //「はい/いいえ」の応答に対する返事の処理
     if(step >= limit+1){
       
       const lowerInput = input.trim().toLowerCase();
@@ -146,15 +147,17 @@ export default function Chat() {
   const [generatedContent, setGeneratedContent] = useState("");
   const [generatedEvaluation, setGeneratedEvaluation] = useState("");
 
-  const handleContentSubmit = async(content,axis) => {
-    const evaluate = await getevaluate(chatLog,content,[axis || "軸が通っているか"]);
+  const handleContentSubmit = async (content, axis) => {
+    const evaluate = await getevaluate(chatLog, content, [
+      axis || "軸が通っているか",
+    ]);
     setGeneratedContent(content);
     setGeneratedEvaluation(evaluate.response);
     setCurrentScreen("evaluation");
     setChatLog([
       ...chatLog,
       { role: "you", parts: ["以下の文章を作成しました："] },
-      { role: "you", parts: [content] }
+      { role: "you", parts: [content] },
     ]);
   };
 
@@ -165,16 +168,20 @@ export default function Chat() {
       setChatLog([
         {
           role: "model",
-          parts: ["言語化の作成が完了しました。次の言語化に取り組む場合は、改めて以下の質問に答えてください。"]
+          parts: [
+            "言語化の作成が完了しました。次の言語化に取り組む場合は、改めて以下の質問に答えてください。",
+          ],
         },
-        { role: "model", parts: [initialQuestions[0]] }
+        { role: "model", parts: [initialQuestions[0]] },
       ]);
       resetChat();
     }
   };
 
   const fetchNextQuestions = (evaluation) => {
-    const newQuestions = ["作成した文章について、もう少し具体的に説明できる部分はありますか？"];
+    const newQuestions = [
+      "作成した文章について、もう少し具体的に説明できる部分はありますか？",
+    ];
     setQuestions(newQuestions);
     setStep(0);
     setCurrentScreen("questions");
@@ -184,11 +191,20 @@ export default function Chat() {
       {
         role: "you",
         parts: [
-          `目的との合致度${evaluation.isRelevant ? "合致していた" : "合致していなかった"} ,表現の適切さ ${evaluation.isAppropriate ? "適切であった" : "不適切であった"}`
-        ]
+          `目的との合致度${
+            evaluation.isRelevant ? "合致していた" : "合致していなかった"
+          } ,表現の適切さ ${
+            evaluation.isAppropriate ? "適切であった" : "不適切であった"
+          }`,
+        ],
       },
-      { role: "model", parts: ["文章の作成お疲れ様でした。さらに深めていくため続けて質問を行います。"] },
-      { role: "model", parts: [newQuestions[0]] }
+      {
+        role: "model",
+        parts: [
+          "文章の作成お疲れ様でした。さらに深めていくため続けて質問を行います。",
+        ],
+      },
+      { role: "model", parts: [newQuestions[0]] },
     ]);
   };
 
@@ -247,7 +263,7 @@ export default function Chat() {
             >
               {msg.role === "model" ? "先生" : "あなた"}
             </span>
-            {msg.parts[0]}
+            <ReactMarkdown>{msg.parts[0]}</ReactMarkdown>
           </div>
         </div>
       ))}
@@ -291,10 +307,7 @@ export default function Chat() {
                 outline: "none",
               }}
             />
-            <button
-              className="formbutton"
-              onClick={handleSend}
-            >
+            <button className="formbutton" onClick={handleSend}>
               送信
             </button>
           </div>
@@ -317,8 +330,7 @@ export default function Chat() {
           onEvaluate={handleEvaluation}
         />
       )}
-    {console.log("形式確認のため",chatLog)}
+      {console.log("形式確認のため", chatLog)}
     </div>
-    
   );
 }
