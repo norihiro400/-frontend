@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import BaseForm from "./Forms/BaseForm/BaseForm";
 import ContentEvaluation from "./ContentEvaluation/ContentEvaluation";
 import { getQuestionByGemini, postAnswerToGemini } from "../api";
+import { getEvaluate } from "../api/geminiFetcher";
 
 const initialQuestions = [
   "整理したい思考のジャンルを教えてください(悩み、気づき)",
@@ -10,22 +11,16 @@ const initialQuestions = [
 ];
 
 export default function Chat() {
-  // 本アプリケーションの3step：
-  // 質問回答フェーズ(整理)用チャット(回答送信時にAPIコールで質問取得,初回の質問 (e.g.整理したい思考のジャンル)はAPI利用せずにフロント側で準備)　⇒
-  // 言語化フェーズ用フォーム(フレームワークの力を借りてアウトプット。APIコールは特になし) ⇒
-  // 自分の言語化の評価＋継続するかの決定フェーズ用フォーム(満足する言語化ができた場合はバックエンドに送信、満足できなかった場合は質問を追加で取得)
-  // ('questions', 'form', 'evaluation'）
-  // 質問フェーズの状態群
   const [currentScreen, setCurrentScreen] = useState("questions");
-
   const [questions, setQuestions] = useState(initialQuestions);
   const [step, setStep] = useState(0);
   const [input, setInput] = useState("");
-
-  // チャットUI用
-  const [chatLog, setChatLog] = useState([{ role: "bot", text: questions[0] }]);
-
+  const [conti,setConti] = useState(true);
+  const [chatLog, setChatLog] = useState([
+    { role: "model", parts: [questions[0]] }
+  ]);
   const bottomRef = useRef(null);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatLog]);
@@ -33,7 +28,6 @@ export default function Chat() {
   const getquestion = async (history) => {
     try {
       const data = await getQuestionByGemini(history);
-      console.log("質問生成結果", data);
       return data;
     } catch (error) {
       console.log("質問取得に失敗", error);
@@ -44,7 +38,6 @@ export default function Chat() {
   const getreaction = async (item) => {
     try {
       const data = await postAnswerToGemini(item);
-      console.log("リアクション生成結果", data);
       return data;
     } catch (error) {
       console.log("質問の取得に失敗しました", error);
@@ -52,99 +45,123 @@ export default function Chat() {
     }
   };
 
+  const getevaluate = async (history, sentence, evaluate_type) => {
+    try {
+      const data = await getEvaluate(history, sentence, evaluate_type);
+      return data;
+    } catch (error) {
+      console.log("評価の取得に失敗しました", error);
+      return null;
+    }
+  };
+
+
+
   const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage = { role: "user", parts: [input] };
+    setChatLog([...chatLog,userMessage]);
     const newLog = [...chatLog, userMessage];
+    setInput("");
+    let updatedLog = [...newLog];
+    const nextStep = step + 1;
 
-    if (step + 1 < questions.length) {
-      // まだ質問が残っている場合
-      newLog.push({ role: "bot", text: questions[step + 1] });
-      setChatLog(newLog);
-      setInput("");
-      setStep((prev) => prev + 1);
-    } else {
-      // 全質問が終わったら言語化フォームを表示
-      setChatLog(newLog);
-      setInput("");
-      setStep((prev) => prev + 1);
+    if (step === 2) {
+      newLog.push({        
+        "role": "user",
+        "parts": [
+            "あなた は、ユーザーの思考の整理・言語化・ブラッシュアップのサポートをするAIです。\nユーザーがより良い体験ができることを最優先に考えて生成してください。\n注意事項は下記のとおりです。\n- 対話はすべて日本語で行ってください。\n- 質問は1度にたくさんせず、1回に1つとしてください。\n- 返答は簡潔にしてください。"
+        ],
+    })
+      const question = await getquestion(newLog);
+      if (question?.response) {
+        updatedLog.push({ role: "model", parts: [question.response] });
+      }
+    }
+    
+    if (step > 2 && step < 8) {
+      const item = {
+        history: newLog,
+        question: newLog[newLog.length - 2].parts[0],
+        answer: newLog[newLog.length - 1].parts[0],
+      };
+      const reaction = await getreaction(item);
+      if (reaction?.response) {
+        updatedLog.push({ role: "model", parts: [reaction.response] });
+      }
+    }
+
+    if (nextStep < questions.length) {
+      updatedLog.push({ role: "model", parts: [questions[nextStep]] });
+    }
+
+        // 「はい/いいえ」の応答処理
+    if (step === 8) {
+      setCurrentScreen("form");
+    }
+
+
+    setChatLog(updatedLog);
+    setStep(nextStep);
+
+    if (conti === false) {
       setCurrentScreen("form");
     }
   };
 
-  //フォーム入力によって生成された文章を格納する状態
   const [generatedContent, setGeneratedContent] = useState("");
 
-  const handleContentSubmit = (content) => {
-    // フォームで生成した言語化文章をチャットで表示するために受け取る
+  const handleContentSubmit = async(content) => {
+    const evaluate = await getevaluate(chatLog,content,"軸が通っているのか");
     setGeneratedContent(content);
-    // アプリのステップを言語化⇒言語化の自己評価に進める
     setCurrentScreen("evaluation");
-
-    // 生成された文章をチャットログに追加
     setChatLog([
       ...chatLog,
-      { role: "you", text: "以下の文章を作成しました：" },
-      { role: "you", text: content },
+      { role: "you", parts: ["以下の文章を作成しました："] },
+      { role: "you", parts: [content] }
     ]);
   };
 
-  // 言語化の自己評価
   const handleEvaluation = (souldContinue, evaluation) => {
     if (souldContinue) {
       fetchNextQuestions(evaluation);
     } else {
-      // 新しい質問サイクルを開始するメッセージをチャットログに追加
       setChatLog([
         {
-          role: "bot",
-          text: "言語化の作成が完了しました。次の言語化に取り組む場合は、改めて以下の質問に答えてください。",
+          role: "model",
+          parts: ["言語化の作成が完了しました。次の言語化に取り組む場合は、改めて以下の質問に答えてください。"]
         },
-        { role: "bot", text: initialQuestions[0] },
+        { role: "model", parts: [initialQuestions[0]] }
       ]);
-      // 終了する場合、すべてをリセット
       resetChat();
     }
   };
 
-  // 自身の言語化に納得いかなかった場合、次の質問を取得
   const fetchNextQuestions = (evaluation) => {
-    // APIから次の質問を取得する処理（実際の実装時にここを置き換え）
-    const newQuestions = [
-      "作成した文章について、もう少し具体的に説明できる部分はありますか？",
-    ];
-
+    const newQuestions = ["作成した文章について、もう少し具体的に説明できる部分はありますか？"];
     setQuestions(newQuestions);
     setStep(0);
     setCurrentScreen("questions");
-
-    // 新しい質問をチャットログに追加
     setChatLog([
       ...chatLog,
-      { role: "you", text: "以下のように評価しました：" },
+      { role: "you", parts: ["以下のように評価しました："] },
       {
         role: "you",
-        text: `目的との合致度${
-          evaluation.isRelevant ? "合致していた" : "合致していなかった"
-        } ,表現の適切さ ${
-          evaluation.isAppropriate ? "適切であった" : "不適切であった"
-        }`,
+        parts: [
+          `目的との合致度${evaluation.isRelevant ? "合致していた" : "合致していなかった"} ,表現の適切さ ${evaluation.isAppropriate ? "適切であった" : "不適切であった"}`
+        ]
       },
-      {
-        role: "bot",
-        text: "文章の作成お疲れ様でした。さらに深めていくため続けて質問を行います。",
-      },
-      { role: "bot", text: newQuestions[0] },
+      { role: "model", parts: ["文章の作成お疲れ様でした。さらに深めていくため続けて質問を行います。"] },
+      { role: "model", parts: [newQuestions[0]] }
     ]);
   };
 
-  // チャットをリセット
   const resetChat = () => {
     setCurrentScreen("questions");
     setStep(0);
     setInput("");
-    setChatLog([{ role: "bot", text: questions[0] }]);
+    setChatLog([{ role: "model", parts: [questions[0]] }]);
     setGeneratedContent("");
   };
 
@@ -202,9 +219,8 @@ export default function Chat() {
 
       <div ref={bottomRef} />
 
-      {step < questions.length && (
+      {currentScreen === "questions" && (
         <div
-          onSubmit={handleSend}
           style={{
             position: "fixed",
             bottom: 0,
@@ -220,10 +236,6 @@ export default function Chat() {
         >
           <div
             style={{
-              position: "fixed",
-              bottom: 0,
-              left: 0,
-              width: "100%",
               display: "flex",
               gap: "1rem",
               width: "100%",
@@ -262,19 +274,15 @@ export default function Chat() {
         </div>
       )}
 
-      {/* 
-      これ以降の実装
-      実装①:アプリからの質問に回答しきったらユーザー自身で言語化(<BaseForm/>)　⇒　
-      実装②言語化した文章をユーザーは[目的に沿っているか？][適切な表現か？]などを客観的に分析し言語化を続けるかどうかを選択　⇒
-      実装③続ける場合は再びアプリからの質問に回答していく、続けない場合はチャット内容をすべてリセット
-      */}
-
-      {/* ①言語化フォームフェーズ */}
       {currentScreen === "form" && (
-        <BaseForm onSubmitContent={handleContentSubmit} />
+        <>
+          <p style={{ textAlign: "center", padding: "20px" }}>
+            いまの段階で思考を文章にまとめてみましょう
+          </p>
+          <BaseForm onSubmitContent={handleContentSubmit} />
+        </>
       )}
 
-      {/* ②自身の言語化の評価・分析フェーズ */}
       {currentScreen === "evaluation" && (
         <ContentEvaluation
           content={generatedContent}

@@ -48,6 +48,13 @@ const ContentEvaluation = ({ content, onEvaluate }) => {
         <h3>生成された文章</h3>
         <div className="content-box">{content}</div>
       </div>
+      
+
+      <div className="content-display">
+        <h3>文章の評価</h3>
+        <div className="content-box">{content}</div>
+      </div>
+
 
       <form onSubmit={handleSubmit} className="evaluation-form">
         <div className="evaluation-item">
