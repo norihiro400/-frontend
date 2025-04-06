@@ -1,5 +1,5 @@
-import React from 'react';
-import './Tabs.css';
+import React from "react";
+import "./Tabs.css";
 
 const Tabs = ({ tabs, activeTab, handleTabChange }) => {
   return (
@@ -7,7 +7,7 @@ const Tabs = ({ tabs, activeTab, handleTabChange }) => {
       {tabs.map((tab) => (
         <button
           key={tab.id}
-          className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+          className={`tab-button ${activeTab === tab.id ? "active" : ""}`}
           onClick={() => handleTabChange(tab.id)}
           type="button"
         >

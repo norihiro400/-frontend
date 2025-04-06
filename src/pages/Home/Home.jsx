@@ -1,16 +1,17 @@
-import React from 'react'
-import "./Home.css"
-import { Navigate, useNavigate } from 'react-router-dom';
+import React from "react";
+import "./Home.css";
+import { Navigate, useNavigate } from "react-router-dom";
 function Home() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
-
     <div className="app-container">
       <div className="chat-container">
         <h1 className="title">思考整理チャット</h1>
-        <p className="subtitle">対話形式であなたの思考を整理し、明確な言語化をサポートします</p>
-        
+        <p className="subtitle">
+          対話形式であなたの思考を整理し、明確な言語化をサポートします
+        </p>
+
         <div className="info-box">
           <p className="info-title">このアプリでできること:</p>
           <ul className="feature-list">
@@ -21,7 +22,7 @@ function Home() {
             <li>作成した文章を評価し改善する</li>
           </ul>
         </div>
-        
+
         <div className="info-box">
           <p className="info-title">対話の流れ:</p>
           <div className="flow-container">
@@ -57,12 +58,18 @@ function Home() {
             </div>
           </div>
         </div>
-        
-        <button className="start-button" onClick={()=>{navigate('/chat')}}>チャットを始める</button>
+
+        <button
+          className="start-button"
+          onClick={() => {
+            navigate("/chat");
+          }}
+        >
+          チャットを始める
+        </button>
       </div>
     </div>
   );
 }
 
-export default Home
-
+export default Home;
