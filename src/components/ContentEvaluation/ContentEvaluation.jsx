@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./ContentEvaluation.css";
 
-const ContentEvaluation = ({ content, onEvaluate }) => {
+const ContentEvaluation = ({ content,evaluate, onEvaluate }) => {
   const [evaluation, setEvaluation] = useState({
     isRelevant: null,
     isAppropriate: null,
@@ -52,7 +52,7 @@ const ContentEvaluation = ({ content, onEvaluate }) => {
 
       <div className="content-display">
         <h3>文章の評価</h3>
-        <div className="content-box">{content}</div>
+        <div className="content-box">{evaluate}</div>
       </div>
 
 

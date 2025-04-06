@@ -43,6 +43,7 @@ const BaseForm = ({ onSubmitContent }) => {
     // 自由記述用初期状態
     [FORM_TYPES.FREE]: {
       content: "",
+      evaluationaxis:""
     },
     // 5W1H用初期状態
     [FORM_TYPES.FIVE_W_ONE_H]: {
@@ -226,7 +227,7 @@ const BaseForm = ({ onSubmitContent }) => {
     const generatedText = generateUnifiedText(activeTab, formState[activeTab]);
 
     // チャットコンポーネントに伝える
-    onSubmitContent(generatedText);
+    onSubmitContent(generatedText,formState[activeTab].evaluationaxis || "");
   };
 
   return (

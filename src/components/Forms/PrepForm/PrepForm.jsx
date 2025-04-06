@@ -2,12 +2,14 @@ import React from "react";
 import TextArea from "../TexrAreaGroup/TextAreaGroup";
 import "./PrepForm.css";
 
+
 function PrepForm({
   formData = {
     point: "hoge",
     reason: "moge",
     example: "hoge",
     pointSummary: "moge",
+    evaluationaxis:"hoge"
   },
   handleInputChange,
 }) {
@@ -48,6 +50,14 @@ function PrepForm({
           value={formData.pointSummary}
           handleInputChange={handleInputChange}
           placeholder="もう一度主張を強調し、まとめてください"
+          rows="3"
+        />
+        <TextArea
+          title="評価してほしい軸"
+          name="evaluationaxis"
+          value={formData.evaluationaxis}
+          handleInputChange={handleInputChange}
+          placeholder="評価してほしい軸を入力してください"
           rows="3"
         />
       </section>

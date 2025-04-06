@@ -16,6 +16,14 @@ function FreeForm({ formData = { content: "hogehoge" }, handleInputChange }) {
           rows="5"
         />
       </section>
+      <TextArea
+          title="評価してほしい軸"
+          name="evaluationaxis"
+          value={formData.evaluationaxis}
+          handleInputChange={handleInputChange}
+          placeholder="評価してほしい軸を入力してください"
+          rows="3"
+        />
 
       {/* 入力内容プレビューセクション*/}
       <section className="preview-section">
@@ -28,6 +36,7 @@ function FreeForm({ formData = { content: "hogehoge" }, handleInputChange }) {
             </div>
           )}
         </div>
+
       </section>
     </>
   );

@@ -3,7 +3,7 @@ import BaseForm from "./Forms/BaseForm/BaseForm";
 import ContentEvaluation from "./ContentEvaluation/ContentEvaluation";
 import { getQuestionByGemini, postAnswerToGemini } from "../api";
 import { getEvaluate } from "../api/geminiFetcher";
-
+import "./Chat.css";
 const initialQuestions = [
   "整理したい思考のジャンルを教えてください(悩み、気づき)",
   "具体的な対象を教えてください。例えば、「プログラミング学習」,「部活動」,「バイト」など",
@@ -111,10 +111,12 @@ export default function Chat() {
   };
 
   const [generatedContent, setGeneratedContent] = useState("");
+  const [generatedEvaluation, setGeneratedEvaluation] = useState("");
 
-  const handleContentSubmit = async(content) => {
-    const evaluate = await getevaluate(chatLog,content,"軸が通っているのか");
+  const handleContentSubmit = async(content,axis) => {
+    const evaluate = await getevaluate(chatLog,content,[axis || "軸が通っているか"]);
     setGeneratedContent(content);
+    setGeneratedEvaluation(evaluate.response);
     setCurrentScreen("evaluation");
     setChatLog([
       ...chatLog,
@@ -257,16 +259,8 @@ export default function Chat() {
               }}
             />
             <button
+              className="formbutton"
               onClick={handleSend}
-              style={{
-                padding: "0.75rem 1.2rem",
-                fontSize: "1rem",
-                backgroundColor: "#5c5ca4",
-                color: "#fff",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer",
-              }}
             >
               送信
             </button>
@@ -286,9 +280,12 @@ export default function Chat() {
       {currentScreen === "evaluation" && (
         <ContentEvaluation
           content={generatedContent}
+          evaluate={generatedEvaluation}
           onEvaluate={handleEvaluation}
         />
       )}
+    {console.log("形式確認のため",chatLog)}
     </div>
+    
   );
 }

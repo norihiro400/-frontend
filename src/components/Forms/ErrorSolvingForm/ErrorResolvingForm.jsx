@@ -10,6 +10,7 @@ function ErrorSolvingForm({
     attemptedSolutions: "",
     finalSolution: "",
     learnings: "",
+    evaluationaxis:"",
   },
   handleInputChange,
 }) {
@@ -71,6 +72,15 @@ function ErrorSolvingForm({
           rows="3"
         />
       </section>
+
+      <TextArea
+          title="評価してほしい軸"
+          name="evaluationaxis"
+          value={formData.evaluationaxis}
+          handleInputChange={handleInputChange}
+          placeholder="評価してほしい軸を入力してください"
+          rows="3"
+        />
 
       {/* 入力内容プレビューセクション*/}
       <section className="preview-section">

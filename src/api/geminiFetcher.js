@@ -1,6 +1,6 @@
 import { fetcher } from "./fetcher";
 
-const BASE_URL = process.env.API_BASE_URL;
+const BASE_URL = "https://backend-theta-inky-62.vercel.app/api/";
 
 export const getQuestion = async (history) => {
   const response = await fetcher(BASE_URL + "question", "POST", {
