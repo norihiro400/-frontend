@@ -36,7 +36,7 @@ const ContentEvaluation = ({ content, onEvaluate }) => {
     const shouldContinue = evaluation.isRelevant === false ||  evaluation.isAppropriate === false ;
     
     // 評価結果を親コンポーネントに渡す
-    onEvaluate(shouldContinue);
+    onEvaluate(shouldContinue,evaluation);
   };
 
   return (

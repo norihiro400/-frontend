@@ -11,7 +11,7 @@ const initialQuestions = [
 export default function Chat() {
 
   // 本アプリケーションの3step：
-  // 質問回答フェーズ(整理)用チャット(マウント時＋回答送信時にAPIコールで質問取得)　⇒　
+  // 質問回答フェーズ(整理)用チャット(回答送信時にAPIコールで質問取得,初回の質問 (e.g.整理したい思考のジャンル)はAPI利用せずにフロント側で準備)　⇒　
   // 言語化フェーズ用フォーム(フレームワークの力を借りてアウトプット。APIコールは特になし) ⇒　
   // 自分の言語化の評価＋継続するかの決定フェーズ用フォーム(満足する言語化ができた場合はバックエンドに送信、満足できなかった場合は質問を追加で取得)
   // ('questions', 'form', 'evaluation'）
@@ -22,11 +22,6 @@ export default function Chat() {
   const [step, setStep] = useState(0);
   const [input, setInput] = useState("");
 
-  // 初期ロード時にAPIから質問を取得
-  useEffect(() => {
-      // APIから質問を取得する処理
-      // 実装されたらここにコードを追加
-  }, []);
 
   // チャットUI用
   const [chatLog, setChatLog] = useState([
@@ -84,24 +79,24 @@ export default function Chat() {
 
 
     // 言語化の自己評価
-    const handleEvaluation = (souldContinue) => {
-      if (souldContinue = true) {
-        // 続ける場合、新しい質問を取得または設定
-        fetchNextQuestions();
+    const handleEvaluation = (souldContinue,evaluation) => {
+      if (souldContinue ) {
+        fetchNextQuestions(evaluation);
       } else {
+        // 新しい質問サイクルを開始するメッセージをチャットログに追加
+        setChatLog([
+          { role: "bot", text: "言語化の作成が完了しました。次の言語化に取り組む場合は、改めて以下の質問に答えてください。" },
+          { role: "bot", text: initialQuestions[0] }
+        ]);
         // 終了する場合、すべてをリセット
         resetChat();
       }
     };
   
     // 自身の言語化に納得いかなかった場合、次の質問を取得
-    const fetchNextQuestions = () => {
+    const fetchNextQuestions = (evaluation) => {
       // APIから次の質問を取得する処理（実際の実装時にここを置き換え）
-      const newQuestions = [
-        "作成した文章について、もう少し具体的に説明できる部分はありますか？",
-        "別の視点から考えると、どのような側面が見えてきますか？",
-        "この文章をさらに発展させるとしたら、どのような内容を追加したいですか？"
-      ];
+      const newQuestions = ["作成した文章について、もう少し具体的に説明できる部分はありますか？",];
 
 
       setQuestions(newQuestions);
@@ -111,6 +106,8 @@ export default function Chat() {
       // 新しい質問をチャットログに追加
       setChatLog([
         ...chatLog,
+        { role: "you", text: "以下のように評価しました："},
+        { role: "you", text: `目的との合致度${evaluation.isRelevant ? "合致していた" : "合致していなかった"} ,表現の適切さ ${evaluation.isAppropriate ? "適切であった" : "不適切であった"}` },
         { role: "bot", text: "文章の作成お疲れ様でした。さらに深めていくため続けて質問を行います。" },
         { role: "bot", text: newQuestions[0] }
       ]);
@@ -182,7 +179,7 @@ export default function Chat() {
 
 
       {step < questions.length && (
-        <div
+        <div onSubmit={handleSend}
           style={{
             position: "fixed",
             bottom: 0,
@@ -239,7 +236,7 @@ export default function Chat() {
 
       {/* 
       これ以降の実装
-      実装①:アプリからの質問に回答しきったら(step === questions.length)ユーザー自身で言語化(<BaseForm/>)　⇒　
+      実装①:アプリからの質問に回答しきったらユーザー自身で言語化(<BaseForm/>)　⇒　
       実装②言語化した文章をユーザーは[目的に沿っているか？][適切な表現か？]などを客観的に分析し言語化を続けるかどうかを選択　⇒
       実装③続ける場合は再びアプリからの質問に回答していく、続けない場合はチャット内容をすべてリセット
       */}
