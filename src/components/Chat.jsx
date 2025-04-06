@@ -11,7 +11,9 @@ const initialQuestions = [
 export default function Chat() {
 
   // 本アプリケーションの3step：
-  // チャットでの質問回答(整理)　⇒　フォーム入力(フレームワークの力を借りてアウトプット) ⇒　自分の言語化を評価
+  // 質問回答フェーズ(整理)用チャット(マウント時＋回答送信時にAPIコールで質問取得)　⇒　
+  // 言語化フェーズ用フォーム(フレームワークの力を借りてアウトプット。APIコールは特になし) ⇒　
+  // 自分の言語化の評価＋継続するかの決定フェーズ用フォーム(満足する言語化ができた場合はバックエンドに送信、満足できなかった場合は質問を追加で取得)
   // ('questions', 'form', 'evaluation'）
   const [currentScreen, setCurrentScreen] = useState('questions');
 

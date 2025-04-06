@@ -221,15 +221,6 @@ const BaseForm = ({onSubmitContent }) => {
     // チャットコンポーネントに伝える
     onSubmitContent(generatedText);
 
-    // ******API送信用のデータのフォーマットを content: generatedTextに統一する＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
-    const unifiedData = {
-      content: generatedText,
-    };
-
-    
-    
-    console.log('送信データ:', unifiedData);
-    // ここでAPIへの送信処理
   };
   
   return (
