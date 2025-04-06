@@ -1,5 +1,5 @@
 export const getQuestionByGemini = async(history) => {
-    const res = await fetch("http://127.0.0.1:8000/api/question",{
+    const res = await fetch("https://vercel.com/yuji1123-hyogos-projects/backend/api/question",{
         method:"POST",
         headers:{"Content-Type": "application/json"},
         body: JSON.stringify({ history }),
@@ -12,7 +12,7 @@ export const getQuestionByGemini = async(history) => {
 };
 
 export const postAnswerToGemini = async(item) => {
-    const res = await fetch("http://127.0.0.1:8000/api/reaction",{
+    const res = await fetch("https://vercel.com/yuji1123-hyogos-projects/backend/api/reaction",{
         method:"POST",
         headers:{"Content-Type": "application/json"},
         body: JSON.stringify( item ),
