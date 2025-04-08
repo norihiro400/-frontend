@@ -57,6 +57,7 @@ export default function Chat() {
   };
 
   const handleSend = async () => {
+    console.log("ぜーんぶのログ",step,limit,chatLog,questions);
     if (!input.trim()) return;
 
     const userMessage = { role: "user", parts: [input] };
@@ -80,6 +81,7 @@ export default function Chat() {
     }
 
     if (step > 2 && step <= limit) {
+      console.log("newLog",newLog)
       const item = {
         history: newLog,
         question: newLog[newLog.length - 2].parts[0],
@@ -157,8 +159,8 @@ export default function Chat() {
     setCurrentScreen("evaluation");
     setChatLog([
       ...chatLog,
-      { role: "you", parts: ["以下の文章を作成しました："] },
-      { role: "you", parts: [content] },
+      { role: "user", parts: ["以下の文章を作成しました："] },
+      { role: "user", parts: [content] },
     ]);
   };
 
@@ -182,15 +184,17 @@ export default function Chat() {
   const fetchNextQuestions = (evaluation) => {
     const newQuestions = [
       "作成した文章について、もう少し具体的に説明できる部分はありますか？",
+      "どこが物足りないと感じましたか?",
+      "改めてあなたの最終目標を教えてください"
     ];
     setQuestions(newQuestions);
     setStep(0);
     setCurrentScreen("questions");
     setChatLog([
       ...chatLog,
-      { role: "you", parts: ["以下のように評価しました："] },
+      { role: "user", parts: ["以下のように評価しました："] },
       {
-        role: "you",
+        role: "user",
         parts: [
           `目的との合致度${
             evaluation.isRelevant ? "合致していた" : "合致していなかった"
@@ -202,7 +206,7 @@ export default function Chat() {
       {
         role: "model",
         parts: [
-          "文章の作成お疲れ様でした。さらに深めていくため続けて質問を行います。",
+          "文章の作成お疲れ様でした。さらに深めていくため続けて質問を行います。"
         ],
       },
       { role: "model", parts: [newQuestions[0]] },
