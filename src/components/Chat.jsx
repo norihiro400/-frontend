@@ -268,7 +268,9 @@ export default function Chat() {
             >
               {msg.role === "model" ? "先生" : "あなた"}
             </span>
-            <ReactMarkdown>{msg.parts[0]}</ReactMarkdown>
+            <ReactMarkdown>
+              {msg.parts[0]}
+            </ReactMarkdown>
           </div>
         </div>
       ))}
@@ -298,11 +300,18 @@ export default function Chat() {
               maxWidth: "600px",
             }}
           >
-            <input
+            <textarea
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey){
+                    e.preventDefault();
+                    handleSend();
+                  }
+              }}  
               placeholder="入力してください..."
+              rows={1}
               style={{
                 flex: 1,
                 padding: "0.75rem 1rem",
@@ -310,6 +319,8 @@ export default function Chat() {
                 border: "1px solid #ccc",
                 borderRadius: "8px",
                 outline: "none",
+                overflow: "hidden", // スクロールバー出さない
+                height: "auto", // 内容に合わせて高さ調整（次に出すオプションで自動伸縮できるように）
               }}
             />
             <button className="formbutton" onClick={handleSend}>
