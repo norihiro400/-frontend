@@ -4,6 +4,7 @@ import ContentEvaluation from "./ContentEvaluation/ContentEvaluation";
 import { getQuestionByGemini, postAnswerToGemini } from "../api";
 import { getEvaluate } from "../api/geminiFetcher";
 import ReactMarkdown from "react-markdown";
+import SpeechRecognition,{useSpeechRecognition} from "react-speech-recognition";
 import "./Chat.css";
 const initialQuestions = [
   "整理したい思考のジャンルを教えてください(悩み、気づき)",
@@ -21,6 +22,18 @@ export default function Chat() {
     { role: "model", parts: [questions[0]] },
   ]);
   const bottomRef = useRef(null);
+    // 音声認識の設定
+    const {
+      transcript,
+      listening,
+      resetTranscript,
+      browserSupportsSpeechRecognition,
+    } = useSpeechRecognition();
+  
+    if (!browserSupportsSpeechRecognition) {
+      console.log("音声認識はこのブラウザではサポートされていません。");
+    }
+  
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -66,6 +79,11 @@ export default function Chat() {
     setInput("");
     let updatedLog = [...newLog];
     const nextStep = step + 1;
+
+    if (listening){
+      SpeechRecognition.stopListening();
+    }
+    resetTranscript();
 
     if (step === 2) {
       newLog.push({
@@ -146,6 +164,14 @@ export default function Chat() {
     setChatLog(updatedLog);
     setStep(nextStep);
   };
+
+
+
+  useEffect(() => {
+    if (transcript){
+      setInput(transcript);
+    }
+  },[transcript])
 
   const [generatedContent, setGeneratedContent] = useState("");
   const [generatedEvaluation, setGeneratedEvaluation] = useState("");
@@ -323,6 +349,27 @@ export default function Chat() {
                 height: "auto", // 内容に合わせて高さ調整（次に出すオプションで自動伸縮できるように）
               }}
             />
+            <button
+            type="button"
+              className="soundbutton"
+              onClick={() =>
+                SpeechRecognition.startListening({
+                  continuous: true,
+                  language: "ja-JP",
+                })
+              }
+            >
+              🎤
+            </button>
+            {listening && (
+              <button
+              type="button"
+              onClick={() => SpeechRecognition.stopListening()}
+              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition"
+            >
+              ⏹️ 停止
+            </button>
+            )}
             <button className="formbutton" onClick={handleSend}>
               送信
             </button>

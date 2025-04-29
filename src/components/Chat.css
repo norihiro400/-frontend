@@ -10,3 +10,19 @@
     border-radius: 8px;
     cursor: pointer;
 }
+
+.soundbutton:hover{
+    background-color: rgb(120, 111, 111);
+}
+
+.soundbutton{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid gray;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+      
+}

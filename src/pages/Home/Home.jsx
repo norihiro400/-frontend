@@ -59,6 +59,36 @@ function Home() {
           </div>
         </div>
 
+        <div className="info-box">
+          <p className="info-title">注意事項:</p>
+          <ul className="feature-list">
+            <li>このアプリはあくまで思考整理のサポートを目的としています。</li>
+            <li>最終的な判断はご自身で行ってください。</li>
+            <li>個人情報や機密情報は入力しないでください。</li>
+          </ul>
+
+        </div>
+
+        <div style={{ marginBottom: "1rem" }}>
+          <label htmlFor="targetSelect" style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold" }}>
+            整理の対象を選択
+          </label>
+          <select
+            id="targetSelect"
+            style={{
+              width: "100%",
+              padding: "0.5rem",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+              fontSize: "1rem",
+            }}
+          >
+            <option value="">デフォルト（通常の思考整理を行います）</option>
+            <option value="就活">就活の対策特化</option>
+            <option value="遊び">遊びに付き合ってくれます</option>
+          </select>
+        </div>
+
         <button
           className="start-button"
           onClick={() => {
