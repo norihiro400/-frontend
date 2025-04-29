@@ -328,6 +328,7 @@ export default function Chat() {
           >
             <textarea
               type="text"
+              className="inputform"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
@@ -338,16 +339,6 @@ export default function Chat() {
               }}  
               placeholder="入力してください..."
               rows={1}
-              style={{
-                flex: 1,
-                padding: "0.75rem 1rem",
-                fontSize: "1rem",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                outline: "none",
-                overflow: "hidden", // スクロールバー出さない
-                height: "auto", // 内容に合わせて高さ調整（次に出すオプションで自動伸縮できるように）
-              }}
             />
             <button
             type="button"
@@ -397,4 +388,3 @@ export default function Chat() {
     </div>
   );
 }
-
