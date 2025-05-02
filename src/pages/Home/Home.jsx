@@ -1,8 +1,10 @@
 import React from "react";
 import "./Home.css";
 import { Navigate, useNavigate } from "react-router-dom";
+import { useState } from "react";
 function Home() {
   const navigate = useNavigate();
+  const [mode, setMode] = useState("");
 
   return (
     <div className="app-container">
@@ -75,6 +77,8 @@ function Home() {
           </label>
           <select
             id="targetSelect"
+            value = {mode}
+            onChange={(e) => setMode(e.target.value)}
             style={{
               width: "100%",
               padding: "0.5rem",
@@ -85,14 +89,13 @@ function Home() {
           >
             <option value="">デフォルト（通常の思考整理を行います）</option>
             <option value="就活">就活の対策特化</option>
-            <option value="遊び">遊びに付き合ってくれます</option>
           </select>
         </div>
 
         <button
           className="start-button"
           onClick={() => {
-            navigate("/chat");
+            navigate("/chat",{state:{mode}});
           }}
         >
           チャットを始める

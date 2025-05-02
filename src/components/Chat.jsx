@@ -5,16 +5,28 @@ import { getQuestionByGemini, postAnswerToGemini } from "../api";
 import { getEvaluate } from "../api/geminiFetcher";
 import ReactMarkdown from "react-markdown";
 import SpeechRecognition,{useSpeechRecognition} from "react-speech-recognition";
+import { useLocation } from "react-router-dom";
 import "./Chat.css";
 const initialQuestions = [
   "整理したい思考のジャンルを教えてください(悩み、気づき)",
   "具体的な対象を教えてください。例えば、「プログラミング学習」,「部活動」,「バイト」など",
   "最終的な目標を教えてください(どういう言語化をしたいですか?)",
 ];
+const initialQuestions2 = [
+  "あなたの就活状況を教えて下さい。例えば、「ES提出中」,「面接中」,「内定承諾済み」など",
+  "どの対策をしたいですか?例えば、「ES」,「1次面接」, 「最終面接」など",
+  "評価の厳しさを設定してください。例えば、「厳しめ」,「普通」,「優しめ」など"
+];
+
 
 export default function Chat() {
+
+  const location = useLocation();
+  const mode = location.state?.mode || "";
+  const initQuestion = mode === "就活" ? initialQuestions2 : initialQuestions;
+
   const [currentScreen, setCurrentScreen] = useState("questions");
-  const [questions, setQuestions] = useState(initialQuestions);
+  const [questions, setQuestions] = useState(initQuestion);
   const [step, setStep] = useState(0);
   const [input, setInput] = useState("");
   const [limit, setLimit] = useState(5);
